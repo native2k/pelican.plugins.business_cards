@@ -26,11 +26,20 @@ class VCardReader(BaseReader):
 
     file_extension = [FILE_ENDING]
 
+    @staticmethod
+    def default_settings():
+        return {"VCARD_STATUS": "hidden"}
+
+    def __init__(self, settings):
+        self.settings = self.default_settings()
+        self.settings.update(settings)
+
     def read(self, filename):
+
         metadata = {
             "afilename": filename,
             "template": "vcard",
-            "status": "hidden",
+            "status": self.settings["VCARD_STATUS"],
             "vcard": {},
             "social": {},
             "urls": {},
