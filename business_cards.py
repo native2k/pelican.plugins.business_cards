@@ -34,7 +34,7 @@ class VCardReader(BaseReader):
             # 'category': ['vcard'],
             "vcard": {},
             "social": {},
-            "url": {},
+            "urls": {},
             "phone": {},
             "email": {},
             "address": {},
@@ -113,7 +113,7 @@ class VCardReader(BaseReader):
                         break
 
                 if not found:
-                    append_to_metadata(url, "url")
+                    append_to_metadata(url, "urls")
 
             # emails
             for email in vcard.email_list:

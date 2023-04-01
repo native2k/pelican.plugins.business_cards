@@ -181,7 +181,7 @@
             {% endfor %}
         {% endfor %}
 
-        {% for type, urls in page.url.items() %}
+        {% for type, urls in page.urls.items() %}
             {% for url in urls %}
             <li class="infofield">
                 <a href="{{url}}" target="_blank">
