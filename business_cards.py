@@ -28,10 +28,9 @@ class VCardReader(BaseReader):
 
     def read(self, filename):
         metadata = {
-            "title": "testtitle",
             "afilename": filename,
             "template": "vcard",
-            # 'category': ['vcard'],
+            "status": "hidden",
             "vcard": {},
             "social": {},
             "urls": {},
@@ -39,7 +38,6 @@ class VCardReader(BaseReader):
             "email": {},
             "address": {},
             "bday": {},
-            # 'qrcode': {}
         }
 
         if not filename.endswith(FILE_ENDING):
@@ -77,6 +75,7 @@ class VCardReader(BaseReader):
                 return "", {}
 
             metadata["vcard"] = vcard
+            metadata["title"] = vcard.fn.value
             metadata["vcardfile"] = ".".join(
                 [vcard.fn.value.replace(" ", "_"), FILE_ENDING]
             )
