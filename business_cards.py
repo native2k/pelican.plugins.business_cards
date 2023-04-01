@@ -56,7 +56,7 @@ class VCardReader(BaseReader):
             key = "-".join(
                 (
                     [e for e in data.params.get("TYPE") or [] if e not in ["pref"]]
-                    or ["HOME"]
+                    or []
                 )
             )
             logger.debug(f"{data.value} - {data.params} -> {key}")
