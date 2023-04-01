@@ -115,7 +115,7 @@
             </p>
         {% endif %}
         <p>
-            <a data-fn={{ page.vcardfile }} href={{ page.vcardfile }} class="nav">
+            <a data-fn={{ page.vcardfile }} href={{ page.vcardfile }} download="{{ page.vcard.fn.value | replace(' ', '_')}}.vcf" class="nav">
                 <button  class="vcard-btn" style=""
                         data-hint="To save the contact, please select &quot;Create New Contact&quot; at the bottom of the next page.">
                     &nbsp;<i class="fa fa-plus"></i> Add contact &nbsp; <i class="fa fa-address-card"></i>

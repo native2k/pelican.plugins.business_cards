@@ -21,17 +21,20 @@ logger = logging.getLogger(__name__)
 FILE_ENDING = "vcf"
 
 
+def default_settings():
+    return {
+        "VCARD_STATUS": "hidden",
+        "VCARD_EMMBED": False,
+    }
+
+
 class VCardReader(BaseReader):
     enabled = True
 
     file_extension = [FILE_ENDING]
 
-    @staticmethod
-    def default_settings():
-        return {"VCARD_STATUS": "hidden"}
-
     def __init__(self, settings):
-        self.settings = self.default_settings()
+        self.settings = default_settings()
         self.settings.update(settings)
 
     def read(self, filename):
@@ -54,10 +57,7 @@ class VCardReader(BaseReader):
 
         def append_to_metadata(data, data_key):
             key = "-".join(
-                (
-                    [e for e in data.params.get("TYPE") or [] if e not in ["pref"]]
-                    or []
-                )
+                ([e for e in data.params.get("TYPE") or [] if e not in ["pref"]] or [])
             )
             logger.debug(f"{data.value} - {data.params} -> {key}")
             metadata[data_key].setdefault(key, []).append(data.value)
@@ -85,9 +85,20 @@ class VCardReader(BaseReader):
 
             metadata["vcard"] = vcard
             metadata["title"] = vcard.fn.value
-            metadata["vcardfile"] = ".".join(
-                [vcard.fn.value.replace(" ", "_"), FILE_ENDING]
-            )
+            if self.settings["VCARD_EMMBED"]:
+                metadata[
+                    "vcardfile"
+                ] = "data:application/{};name={}.{};base64,{}".format(
+                    FILE_ENDING,
+                    vcard.fn.value.replace(" ", "_"),
+                    FILE_ENDING,
+                    base64.b64encode(vcard.serialize().encode("utf-8")).decode("utf-8"),
+                )
+            else:
+                metadata["vcardfile"] = ".".join(
+                    [vcard.fn.value.replace(" ", "_"), FILE_ENDING]
+                )
+
             metadata["photo"] = "data:image/{};{},{}".format(
                 vcard.photo.params["TYPE"][0].lower(),
                 {"b": "base64"}.get(vcard.photo.params["ENCODING"][0].lower()),
@@ -159,15 +170,19 @@ class VCardReader(BaseReader):
 
 class VCardGenerator(Generator):
     def generate_output(self, writer):
-        for p in self.context["pages"]:
-            if vcard := p.metadata.get("vcard"):
-                file_name = path.join(
-                    self.settings["OUTPUT_PATH"],
-                    p.save_as.replace("index.html", p.metadata["vcardfile"]),
-                )
-                with open(file_name, "w") as fh:
-                    # TODO add url to vcf ??
-                    fh.write(vcard.serialize())
+        settings = default_settings()
+        settings.update(writer.settings)
+
+        if not settings["VCARD_EMMBED"]:
+            for p in self.context["pages"]:
+                if vcard := p.metadata.get("vcard"):
+                    file_name = path.join(
+                        self.settings["OUTPUT_PATH"],
+                        p.save_as.replace("index.html", p.metadata["vcardfile"]),
+                    )
+                    with open(file_name, "w") as fh:
+                        # TODO add url to vcf ??
+                        fh.write(vcard.serialize())
 
 
 def get_generator(generator):
