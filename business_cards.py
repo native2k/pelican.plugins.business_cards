@@ -126,7 +126,7 @@ class VCardReader(BaseReader):
             # urls
             for url in vcard.url_list:
                 found = False
-                for social in ["linkedin", "github", "twitter", "gitlab", "facebook"]:
+                for social in ["linkedin", "xing", "github", "twitter", "youtube", "gitlab", "facebook"]:
                     if found := social in url.value:
                         metadata["social"].setdefault(social, []).append(url.value)
                         break
