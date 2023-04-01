@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="{{ DEFAULT_LANG }}" itemscope itemtype="http://schema.org/Person">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+    <!-- Site Meta Data -->
+    <title>{% block title %}{{ page.vcard.fn.value }}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <meta name="description" content="{{ AUTHOR_DESCRIPTION }}"> -->
+    <meta name="author" content="{{ page.vcard.fn.value }}">
+
+    <link rel="shortcut icon" href="{{ FAVICON }}">
+
+    <!-- schema.org -->
+
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+    <!-- Style Meta Data -->
+    <link rel="stylesheet" href="{{ main_siteurl or SITEURL }}/{{ THEME_STATIC_DIR }}/css/style.css" type="text/css" />
+    <link rel="stylesheet" href="{{ main_siteurl or SITEURL }}/{{ THEME_STATIC_DIR }}/css/pygments.css" type="text/css" />
+
+    <!– Fontawesome -->
+    <!-- 
+    <link rel="stylesheet" href="{{ main_siteurl or SITEURL }}/{{ THEME_STATIC_DIR }}/fontawesome-free-6.4.0-web/css/fontawesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="{{ main_siteurl or SITEURL }}/{{ THEME_STATIC_DIR }}/fontawesome-free-6.4.0-web/css/brands.min.css" type="text/css" />
+    <link rel="stylesheet" href="{{ main_siteurl or SITEURL }}/{{ THEME_STATIC_DIR }}/fontawesome-free-6.4.0-web/css/solid.min.css" type="text/css" />
+     -->
+    <link rel="stylesheet" href="../theme/fontawesome-free-6.4.0-web/css/fontawesome.min.css" type="text/css" />
+    <link rel="stylesheet" href="../theme/fontawesome-free-6.4.0-web/css/brands.min.css" type="text/css" />
+    <link rel="stylesheet" href="../theme/fontawesome-free-6.4.0-web/css/solid.min.css" type="text/css" />
+
+
+    {% endblock %}
+    <style>
+        .profile {
+            width:200px;
+            border-radius: 50%
+        }
+        .vcard-btn {
+            background-color: white;
+            border-radius: 8px;
+            padding: 6px;
+            border: 0;
+            min-width: 160px;
+        }
+        .infofield {
+            display: flex;
+/*            text-align: -webkit-match-parent;*/
+        }
+        .inforow {
+/*            position: relative;*/
+        }
+        .labelicon {
+            font-size: 26px;
+            padding: 0px 0px 6px 0px;
+            max-height: 10px;
+            margin-top: -4px;
+            /* color: #ababab; */
+            width: 80px;
+            text-align: center;
+
+        }
+        .labelname {
+            font-weight: 400;
+            position: relative;
+            top: -30px;
+            left: 80px;
+
+        }
+        .labelvalue {
+            font-weight: 400;
+            position: relative;
+            top: -30px;
+            left: 80px;
+        }
+        .property-group {
+            display: block;
+            list-style-type: none;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+            padding-inline-start: 40px;
+            overflow-wrap: anywhere;
+
+        } 
+        .contact-info {
+            order: 3;
+        }
+        div {
+            display: block;
+        }
+
+    </style>
+</head>
+
+
+<body>
+    <aside>
+        <img src={{page.photo}} class="profile" alt="Profile Picture">
+        <h1>{{ page.vcard.fn.value }}</h1>
+        <p>
+            {{ page.vcard.title.value }}
+            {% for org in page.vcard.org.value[1:] %} - {{ org}}{% endfor %}
+        </p>
+        <h2>
+            {{ page.vcard.org.value[0] }}
+        </h2>
+        {% if page.social %}
+            <p class="social">
+                {% for name, links in page.social.items() %}
+                    {% for link in links %}
+                        <a href="{{ link }}" target="_blank" alt="{{ name|lower }}"><img src="{{ main_siteurl or SITEURL }}/{{ THEME_STATIC_DIR }}/images/icons/{{ name|lower }}.png"></a>
+                    {% endfor %}
+                {% endfor %}
+            </p>
+        {% endif %}
+        <p>
+            <a data-fn={{ page.vcardfile }} href={{ page.vcardfile }} class="nav">
+                <button  class="vcard-btn" style=""
+                        data-hint="To save the contact, please select &quot;Create New Contact&quot; at the bottom of the next page.">
+                    &nbsp;<i class="fa fa-plus"></i> Add contact &nbsp; <i class="fa fa-address-card"></i>
+                </button>
+            </a>
+        </p>
+        <br />
+    </aside>
+
+    <!-- Content -->
+    <article>
+        {% block content %}
+        <ul classe="property-group contact-info">
+       
+
+        {% for type, urls in page.email.items() %}
+            {% for url in urls %}
+            <li class="infofield">
+                <a href="mailto:{{url}}" target="_blank">
+                <div class="inforow">
+                    <div class="labelicon">
+                        <i class="fa fa-envelope"></i>
+                    </div>
+                </div>
+                <div class="inforow">
+                    <div class="labelname">E-mail 
+                        {% if 'HOME' in type %}(privat <i class="fa-solid fa-house"></i>)
+                        {% elif 'WORK' in type %}(business <i class="fa fa-briefcase"></i>){% endif %}
+                    </div>
+                    <div class="labelvalue">{{ url }}</div>
+                </div>
+                </a>
+            </li>
+            {% endfor %}
+        {% endfor %}
+
+
+        {% for type, urls in page.phone.items() %}
+            {% for url in urls %}
+            <li class="infofield">
+                <a href="tel:{{url}}" target="_blank">
+                <div class="inforow">
+                    <div class="labelicon">
+                        {% if 'CELL' in type %}
+                        <i class="fa fa-mobile"></i>
+                        {% elif 'FAX' in type %}
+                        <i class="fa fa-fax"></i>
+                        {% else %} 
+                        <i class="fa fa-phone"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="inforow">
+                    <div class="labelname">
+                        {% if 'CELL' in type %} Mobile {% elif 'FAX' in type %} Fax {% else %} Phone {% endif %}
+                        {% if 'HOME' in type %}(privat <i class="fa fa-house"></i>)
+                        {% elif 'WORK' in type %}(business <i class="fa fa-briefcase"></i>){% endif %}
+                    </div>
+                    <div class="labelvalue">{{ url }}</div>
+                </div>
+                </a>
+            </li>
+            {% endfor %}
+        {% endfor %}
+
+        {% for type, urls in page.url.items() %}
+            {% for url in urls %}
+            <li class="infofield">
+                <a href="{{url}}" target="_blank">
+                <div class="inforow">
+                    <div class="labelicon">
+                        <i class="fa fa-globe"></i>
+                    </div>
+                </div>
+                <div class="inforow">
+                    <div class="labelname">
+                        Website
+                        {% if 'HOME' in type %}(privat <i class="fa fa-house"></i>)
+                        {% elif 'WORK' in type %}(business <i class="fa fa-briefcase"></i>){% endif %}
+                    </div>
+                    <div class="labelvalue">{{ url }}</div>
+                </div>
+                </a>
+            </li>
+            {% endfor %}
+        {% endfor %}
+
+        {% if page.bday %}
+            <li class="infofield">
+                <a href="{{page.bday.href}}" target="_blank" download='event.ics'>
+                <div class="inforow">
+                    <div class="labelicon">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </div>
+                </div>
+                <div class="inforow">
+                    <div class="labelname">date of birth
+                       
+                    </div>
+                    <div class="labelvalue">{{ page.bday.object | datetime('%d %b %Y') }}</div>
+                </div>
+                </a>
+            </li>
+        {% endif %}
+
+        {% for type, datas in page.address.items() %}
+            {% for data in datas %}
+            <li class="infofield">
+                <a href="https://www.google.de/maps/place/{{ data.street }},+{{data.code}}+{{data.city}}" target="_blank">
+                <div class="inforow">
+                    <div class="labelicon">
+                        <i class="fa fa-location-dot"></i>
+                    </div>
+                </div>
+                <div class="inforow">
+                    <div class="labelname">
+                        Address
+                        {% if 'HOME' in type %}(privat <i class="fa fa-house"></i>)
+                        {% elif 'WORK' in type %}(business <i class="fa fa-briefcase"></i>){% endif %}
+                    </div>
+                    <div class="labelvalue">
+                        {{ data.adr_list | join(', ') }}
+                    </div>
+                </div>
+                </a>
+            </li>
+            {% endfor %}
+        {% endfor %}
+
+
+        {% endblock %}
+        </ul>
+
+        {% if page.qrcode %}
+        <img src="{{ page.qrcode }}" alt="QRCode for business card"/>
+        {% endif %}
+        </article>
+
+</body>
+</html>
