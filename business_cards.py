@@ -24,7 +24,6 @@ FILE_ENDING = "vcf"
 def default_settings():
     return {
         "VCARD_STATUS": "hidden",
-        "VCARD_EMMBED": False,
     }
 
 
@@ -85,19 +84,6 @@ class VCardReader(BaseReader):
 
             metadata["vcard"] = vcard
             metadata["title"] = vcard.fn.value
-            if self.settings["VCARD_EMMBED"]:
-                metadata[
-                    "vcardfile"
-                ] = "data:application/{};name={}.{};base64,{}".format(
-                    FILE_ENDING,
-                    vcard.fn.value.replace(" ", "_"),
-                    FILE_ENDING,
-                    base64.b64encode(vcard.serialize().encode("utf-8")).decode("utf-8"),
-                )
-            else:
-                metadata["vcardfile"] = ".".join(
-                    [vcard.fn.value.replace(" ", "_"), FILE_ENDING]
-                )
 
             metadata["photo"] = "data:image/{};{},{}".format(
                 vcard.photo.params["TYPE"][0].lower(),
@@ -126,7 +112,15 @@ class VCardReader(BaseReader):
             # urls
             for url in vcard.url_list:
                 found = False
-                for social in ["linkedin", "xing", "github", "twitter", "youtube", "gitlab", "facebook"]:
+                for social in [
+                    "linkedin",
+                    "xing",
+                    "github",
+                    "twitter",
+                    "youtube",
+                    "gitlab",
+                    "facebook",
+                ]:
                     if found := social in url.value:
                         metadata["social"].setdefault(social, []).append(url.value)
                         break
@@ -168,25 +162,30 @@ class VCardReader(BaseReader):
         return f"{vcard.fn.value} Business card", metadata
 
 
-class VCardGenerator(Generator):
-    def generate_output(self, writer):
-        settings = default_settings()
-        settings.update(writer.settings)
+def addVCRFile(page_generator, content):
+    # logger.warning(f'addVCRFile -> page_generator: {page_generator}')
+    # logger.info(f'addVCRFile save_as -> {content.save_as}')
+    # logger.info(f'addVCRFile relative_dir -> {content.relative_dir}')
+    # logger.info(f'addVCRFile slug -> {content.slug}')
+    # logger.info(f'addVCRFile source_path -> {content.source_path}')
+    # logger.info(f'addVCRFile url -> {content.url}')
+    # logger.info(f'addVCRFile url_format -> {content.url_format}')
 
-        if not settings["VCARD_EMMBED"]:
-            for p in self.context["pages"]:
-                if vcard := p.metadata.get("vcard"):
-                    file_name = path.join(
-                        self.settings["OUTPUT_PATH"],
-                        p.save_as.replace("index.html", p.metadata["vcardfile"]),
-                    )
-                    with open(file_name, "w") as fh:
-                        # TODO add url to vcf ??
-                        fh.write(vcard.serialize())
+    settings = default_settings()
+    settings.update(page_generator.settings)
 
-
-def get_generator(generator):
-    return VCardGenerator
+    if vcard := content.metadata.get("vcard"):
+        file_name = path.join(
+            settings["OUTPUT_PATH"],
+            content.save_as.replace("/index.html", f".{FILE_ENDING}"),
+        )
+        logger.info(f"Write vcdata for {content} to {file_name}")
+        with open(file_name, "w") as fh:
+            # TODO add url to vcf ??
+            fh.write(vcard.serialize())
+        content.vcardfile = (
+            f'../{content.url.strip("/")}.{FILE_ENDING}'  # '/'+file_name.split('/')[-1]
+        )
 
 
 def add_reader(readers):
@@ -196,7 +195,4 @@ def add_reader(readers):
 # This is how pelican works.
 def register():
     signals.readers_init.connect(add_reader)
-    signals.get_generators.connect(get_generator)
-
-
-#
+    signals.page_generator_write_page.connect(addVCRFile)
